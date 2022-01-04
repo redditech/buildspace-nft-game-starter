@@ -3,10 +3,14 @@ import './SelectCharacter.css';
 import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, transformCharacterData } from "../../constants";
 import stickmanBattleGame from '../../utils/StickmanBattleGame.json';
+import LoadingIndicator from '../LoadingIndicator';
 
 const SelectCharacter = ({ setCharacterNFT }) => {
     const [characters, setCharacters] = useState([]);
     const [gameContract, setGameContract] = useState(null);
+
+    // minting state
+    const [mintingCharacter, setMintingCharacter] = useState(false);
 
     useEffect(() => {
         const { ethereum } = window;
@@ -85,14 +89,21 @@ const SelectCharacter = ({ setCharacterNFT }) => {
     const mintCharacterNFTAction = (characterId) => async () => {
         try {
             if (gameContract) {
+                // Show our loading indicator
+                setMintingCharacter(true);
                 console.log("Minting character in progress...");
                 const mintTxn = await gameContract.mintCharacterNFT(characterId);
                 await mintTxn.wait();
                 console.log("mintTxn: ", mintTxn);
+                // Hide loading indicator when finished
+                setMintingCharacter(false);
             }
         } catch (error) {
             console.warn("MintCharacterAction Error: ", error);
+            // If there was an error, hide loading indicator as well
+            setMintingCharacter(false);
         }
+
     }
 
     const renderCharacters = () =>
@@ -119,6 +130,20 @@ const SelectCharacter = ({ setCharacterNFT }) => {
             {characters.length > 0 && (
                 <div className="character-grid">{renderCharacters()}</div>
             )}
+            {/* Only show loading state if mintingCharacter is true */}
+            {mintingCharacter && (
+                <div className="loading">
+                    <div className="indicator">
+                        <LoadingIndicator />
+                        <p> Minting In Progress ...</p>
+                    </div>
+                    <img
+                        src="https://media2.giphy.com/media/61tYloUgq1eOk/giphy.gif?cid=ecf05e47dg95zbpabxhmhaksvoy8h526f96k4em0ndvx078s&rid=giphy.gif&ct=g"
+                        alt="Minting loading indicator"
+                    />
+                </div>
+            )}
+
         </div>
     )
 }

@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, transformCharacterData } from "../../constants";
 import stickmanBattleGame from "../../utils/StickmanBattleGame.json";
 import "./Arena.css";
+import LoadingIndicator from '../LoadingIndicator';
 
 // pass in characterNFT metadata so we can do a cool card in our UI
 
@@ -13,6 +14,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     // State that will hold boss metadata
     const [boss, setBoss] = useState(null);
     const [attackState, setAttackState] = useState('');
+    const [showToast, setShowToast] = useState(false);
 
     // Actions
     const runAttackAction = async () => {
@@ -24,12 +26,18 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 await attackTxn.wait();
                 console.log("attackTxn: ", attackTxn);
                 setAttackState("hit");
+
+                // set toast true, and then false 5 seconds later.
+                setShowToast(true);
+                setTimeout(() => {
+                    setShowToast(false);
+                }, 5000)
             }
         } catch (error) {
             console.error("Error attacking boss: ", error);
             setAttackState("");
         }
-     };
+    };
     //useEffects
     useEffect(() => {
         //setup async function that will get the boss from our contract and set in state
@@ -48,10 +56,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
             // Update both player and boss Hp
             setBoss((prevState) => {
-                return {...prevState, hp:bossHp};
+                return { ...prevState, hp: bossHp };
             });
-            setCharacterNFT((prevState)=> {
-                return {...prevState, hp:playerHp}
+            setCharacterNFT((prevState) => {
+                return { ...prevState, hp: playerHp }
             });
         }
 
@@ -88,6 +96,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
     return (
         <div className="arena-container">
+            {boss && characterNFT && (
+                <div id="toast" className={showToast ? 'show' : ''}>
+                    <div id="desc">{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+                </div>
+            )}
             {boss && (
                 <div className="boss-container">
                     <div className={`boss-content ${attackState}`}>
@@ -105,6 +118,12 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                             {`💥 Attack ${boss.name}`}
                         </button>
                     </div>
+                    {attackState === 'attacking' && (
+                        <div className="loading-indicator">
+                            <LoadingIndicator />
+                            <p>Attacking...</p>
+                        </div>
+                    )}
                 </div>
             )}
             {/* Character NFT */}
@@ -123,12 +142,25 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                                     <progress value={characterNFT.hp} max={characterNFT.maxHp} />
                                     <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
                                 </div>
+                                
                             </div>
                             <div className="stats">
                                 <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
                             </div>
+                            <div>
+                            {characterNFT.hp <= 0 && (
+                                    <button type="button"
+                                        className="character-mint-button">
+                                        Revive your hero!
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
+                    {/* <div className="active-players">
+                            <h2>Active Players</h2>
+                            <div className="players-list">{renderActivePlayersList()}</div>
+                        </div> */}
                 </div>
             )}
         </div>
