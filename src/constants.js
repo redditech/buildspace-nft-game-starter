@@ -1,4 +1,4 @@
-const CONTRACT_ADDRESS = "0x0a4b6c7b25005d3B9a2E0C9F582821c7175976e6";
+const CONTRACT_ADDRESS = "0x10972Eee387999AF0de0870b53859FCfb79B73c0";
 
 const transformCharacterData = (characterData) => {
     return {
@@ -10,4 +10,4 @@ const transformCharacterData = (characterData) => {
         attackDamage: characterData.attackDamage.toNumber()
     }
 }
-export {CONTRACT_ADDRESS, transformCharacterData};
+export { CONTRACT_ADDRESS, transformCharacterData };

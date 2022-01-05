@@ -63,7 +63,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
             if (gameContract) {
                 const characterNFT = await gameContract.checkIfUserHasNFT();
                 console.log("CharacterNFT: ", characterNFT);
-                setCharacters(transformCharacterData(characterNFT));
+                setCharacterNFT(transformCharacterData(characterNFT));
             }
 
             alert(`Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
@@ -97,6 +97,10 @@ const SelectCharacter = ({ setCharacterNFT }) => {
                 console.log("mintTxn: ", mintTxn);
                 // Hide loading indicator when finished
                 setMintingCharacter(false);
+                // update the page with the user's new character NFT
+                const characterNFT = await gameContract.checkIfUserHasNFT();
+                console.log("CharacterNFT: ", characterNFT);
+                setCharacterNFT(transformCharacterData(characterNFT));
             }
         } catch (error) {
             console.warn("MintCharacterAction Error: ", error);
@@ -138,7 +142,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
                         <p> Minting In Progress ...</p>
                     </div>
                     <img
-                        src="https://media2.giphy.com/media/61tYloUgq1eOk/giphy.gif?cid=ecf05e47dg95zbpabxhmhaksvoy8h526f96k4em0ndvx078s&rid=giphy.gif&ct=g"
+                        src="https://i.imgur.com/IFddaw7.gif"
                         alt="Minting loading indicator"
                     />
                 </div>

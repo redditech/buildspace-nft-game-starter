@@ -168,6 +168,11 @@ const App = () => {
           <p className="header gradient-text">⚔️ Stickman Battles ⚔️</p>
           <p className="sub-text">Team up to fight the Big Boss!</p>
           {renderContent()}
+          <div>
+            <a href="https://faucets.chain.link/rinkeby" target="_blank" rel="noreferrer">
+              Get Rinkeby Testnet ETH
+            </a>
+          </div>
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />

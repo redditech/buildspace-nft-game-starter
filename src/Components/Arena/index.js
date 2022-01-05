@@ -17,6 +17,22 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     const [showToast, setShowToast] = useState(false);
 
     // Actions
+    const runReviveAction = async () => {
+        try {
+            if (gameContract) {
+                setAttackState('reviving');
+                console.log("Reviving hero...");
+                const reviveTxn = await gameContract.revivePlayer();
+                await reviveTxn.wait();
+                console.log("reviveTxn: ", reviveTxn);
+                setAttackState("");
+            }
+        }
+        catch (error) {
+            console.log("Error reviving: ", error);
+            setAttackState("");
+        }
+    }
     const runAttackAction = async () => {
         try {
             if (gameContract) {
@@ -61,18 +77,30 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
             setCharacterNFT((prevState) => {
                 return { ...prevState, hp: playerHp }
             });
+        };
+
+        const onReviveComplete = (newPlayerHp) => {
+            const playerHp = newPlayerHp.toNumber();
+            console.log(`RevivePlayer: Player Hp: ${playerHp}`)
+
+            // Update the player Hp
+            setCharacterNFT((prevState) => {
+                return { ...prevState, hp: playerHp }
+            })
         }
 
         if (gameContract) {
             // game is ready to go, let's fetch our boss
             fetchBoss();
             gameContract.on("AttackComplete", onAttackComplete);
+            gameContract.on("ReviveComplete", onReviveComplete);
         }
 
         // clean up this even when component is removed
         return () => {
             if (gameContract) {
                 gameContract.off("AttackComplete", onAttackComplete);
+                gameContract.off("ReviveComplete", onReviveComplete);
             }
         }
     }, [gameContract])
@@ -122,6 +150,27 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                         <div className="loading-indicator">
                             <LoadingIndicator />
                             <p>Attacking...</p>
+                            <img
+                                src="https://i.imgur.com/IFddaw7.gif"
+                                alt="Minting loading indicator" style={{
+                                    borderRadius: '10px', width: '300px', height: '150px'
+                                }}
+                            />
+                        </div>
+                    )}
+                    {/* Only show loading state if reviving is true */}
+                    {attackState === 'reviving' && (
+                        <div className="loading">
+                            <div className="indicator">
+                                <LoadingIndicator />
+                                <p> Reviving In Progress ...</p>
+                            </div>
+                            <img
+                                src="https://i.imgur.com/7P0yYCZ.gif"
+                                alt="Reviving loading indicator" style={{
+                                    borderRadius: '10px', width: '300px', height: '150px'
+                                }}
+                            />
                         </div>
                     )}
                 </div>
@@ -142,19 +191,20 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                                     <progress value={characterNFT.hp} max={characterNFT.maxHp} />
                                     <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
                                 </div>
-                                
+
                             </div>
                             <div className="stats">
                                 <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
                             </div>
                             <div>
-                            {characterNFT.hp <= 0 && (
+                                {characterNFT.hp <= 0 && (
                                     <button type="button"
-                                        className="character-mint-button">
+                                        className="character-mint-button" onClick={runReviveAction}>
                                         Revive your hero!
                                     </button>
                                 )}
                             </div>
+
                         </div>
                     </div>
                     {/* <div className="active-players">
